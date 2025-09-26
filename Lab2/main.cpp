@@ -2,257 +2,350 @@
 
 using namespace std;
 
-class Color
+class Vector
 {
 public:
-    int get_r()
+    Vector()
     {
-        return r;
-    }
-
-    int get_g()
-    {
-        return g;
-    }
-
-    int get_b()
-    {
-        return b;
-    }
-
-    int get_h()
-    {
-        return h;
-    }
-
-    float get_s()
-    {
-        return s;
-    }
-
-    float get_v()
-    {
-        return v;
+        flag = true;
+        size = 0;
+        array = nullptr;
+        
+        cout << "Вызван конструктор по умолчанию " << this << endl;
     }
     
-    void set_RGB(int r, int g, int b)
+    Vector(int size)
     {
-        if (!is_valid_RGB(r))
-        {
-            throw out_of_range("R value must be between 0 and 255");
-        }
-        this->r = r;
+        flag = true;
+        this->size = size;
+        array = new int[size] {};
         
-        if (!is_valid_RGB(g))
-        {
-            throw out_of_range("G value must be between 0 and 255");
-        }
-        this->g = g;
-        
-        if (!is_valid_RGB(b))
-        {
-            throw out_of_range("B value must be between 0 and 255");
-        }
-        this->b = b;
-
-        RGB_to_HSV(r, g, b);
+        cout << "Вызван конструктор с параметром размера " << this << endl;
     }
     
-    void set_HSV(int h, float s, float v)
+    Vector(int size, int value)
     {
-        if (!is_valid_H(h))
+        flag = true;
+        this->size = size;
+        array = new int[size] {};
+        for (int i = 0; i < size; i++)
         {
-            throw out_of_range("H value must be between 0 and 360");
+            array[i] = value;
         }
-        this->h = h;
-        
-        if (!is_valid_SV(s))
-        {
-            throw out_of_range("S value must be between 0 and 1");
-        }
-        this->s = s;
-        
-        if (!is_valid_SV(v))
-        {
-            throw out_of_range("V value must be between 0 and 1");
-        }
-        this->v = v;
-        
-        HSV_to_RGB(h, s, v);
+        cout << "Вызван конструктор с параметром размера и значения " << this << endl;
     }
     
-    void print()
+    Vector(int *external, int size)
     {
-        cout << "R = " << r << "\t G = " << g << "\t B = " << b << endl;
-        cout << "H = " << h << "°\t S = " << s << "\t V = " << v << endl;
+        flag = false;
+        this->size = size;
+        array = external;
+        cout << "Вызван конструктор, принимающий внешний массив и его размер " << this << endl;
     }
-
+    
+    Vector(const Vector &other)
+    {
+        this->size = other.size;
+        this->flag = other.flag;
+        
+        if (other.flag)
+        {
+            this->array = new int[other.size];
+            for (int i = 0; i < other.size; i++)
+            {
+                this->array[i] = other.array[i];
+            }
+            cout << "Вызван конструктор копирования владеющего вектора " << this << endl;
+        }
+        else
+        {
+            this->array = other.array;
+            cout << "Вызван конструктор копирования невладеющего вектора " << this << endl;
+        }
+    }
+    
+    ~Vector()
+    {
+        if (flag && array != nullptr)
+        {
+            delete[] array;
+        }
+        cout << "Вызван деструктор " << this << endl;
+    }
+    
+    int Size()
+    {
+        return size;
+    }
+    
+    bool OwnsMemory()
+    {
+        return flag;
+    }
+    
+    void SetElement(int index, int value)
+    {
+        if (index < 0 || index >= size)
+        {
+            cout << "Индекс выходит за пределы вектора" << endl;
+        }
+        else
+        {
+            array[index] = value;
+        }
+    }
+    
+    int GetElement(int index)
+    {
+        if (index < 0 || index >= size)
+        {
+            cout << "Индекс выходит за пределы вектора" << endl;
+            return 0;
+        }
+        else
+        {
+            return array[index];
+        }
+    }
+    
+    int Dot(const Vector& other) const
+    {
+        int res = 0;
+        
+        if (this->size == other.size)
+        {
+            for (int i = 0; i < other.size; i++)
+            {
+                res += array[i] * other.array[i];
+            }
+            return res;
+        }
+        else
+        {
+            cout << "Векторы разного размера" << endl;
+            return 0;
+        }
+    }
+    
+    void Link(int *external_ptr, int size)
+    {
+        if (flag && array != nullptr)
+        {
+            delete[] array;
+        }
+        flag = false;
+        this->size = size;
+        array = external_ptr;
+    }
+    
+    void Unlink()
+    {
+        if (!flag)
+        {
+            int *new_array = new int[size];
+            for (int i = 0; i < size; i++)
+            {
+                new_array[i] = array[i];
+            }
+            array = new_array;
+            flag = true;
+        }
+    }
+    
+    void print() {
+        cout << "Размер массива: " << size
+             << "\t Значение флага: " << flag
+             << "\t Значения массива: [ ";
+        
+        for (int i = 0; i < size; i++) {
+            cout << array[i] << " ";
+        }
+        cout << "]" << endl;
+    }
+    
 private:
-    int r;
-    int g;
-    int b;
-    int h;
-    float s;
-    float v;
-    
-    bool is_valid_RGB(int value)
-    {
-        return value >= 0 && value <= 255;
-    }
-    
-    bool is_valid_H(int h)
-    {
-        return h >= 0 && h <= 360;
-    }
-    
-    bool is_valid_SV(float value)
-    {
-        return value >= 0.0 && value <= 1.0;
-    }
-    
-    void RGB_to_HSV(int r, int g, int b)
-    {
-        float r_norm = r / 255.0f;
-        float g_norm = g / 255.0f;
-        float b_norm = b / 255.0f;
-        
-        float maximum = max({r_norm, g_norm, b_norm});
-        float minimum = min({r_norm, g_norm, b_norm});
-        float diff = maximum - minimum;
-        
-        v = maximum;
-        
-        maximum == 0 ? s = 0 : s = diff / maximum;
-        
-        if (diff == 0)
-        {
-            h = 0;
-        }
-        
-        else if (maximum == r_norm)
-        {
-            h = ((int)((g_norm - b_norm) / diff)) % 6;;
-        }
-        
-        else if (maximum == g_norm)
-        {
-            h = ((b_norm - r_norm) / diff) + 2;
-        }
-        
-        else if (maximum == b_norm)
-        {
-            h = ((r_norm - g_norm) / diff) + 4;
-        }
-        
-        h *= 60;
-        
-        if (h < 0)
-        {
-            h += 360;
-        }
-    }
-
-    void HSV_to_RGB(int h, float s, float v)
-    {
-        float c = s * v;
-        float x = c * (1 - abs((h / 60) % 2 - 1));
-        float m = v - c;
-        float r1 = 0;
-        float g1 = 0;
-        float b1 = 0;
-        
-        if (h >= 0 && h < 60)
-        {
-            r1 = c;
-            g1 = x;
-        }
-        
-        else if (h >= 60 && h < 120)
-        {
-            r1 = x;
-            g1 = c;
-        }
-        
-        else if (h >= 120 && h < 180)
-        {
-            g1 = c;
-            b1 = x;
-        }
-        
-        else if (h >= 180 && h < 240)
-        {
-            g1 = x;
-            b1 = c;
-        }
-        
-        else if (h >= 240 && h < 300)
-        {
-            r1 = x;
-            b1 = c;
-        }
-        
-        else if (h >= 300 && h < 360)
-        {
-            r1 = c;
-            b1 = x;
-        }
-        
-        r = round((r1 + m) * 255);
-        g = round((g1 + m) * 255);
-        b = round((b1 + m) * 255);
-    }
+    bool flag;
+    int size;
+    int *array;
 };
 
 int main()
 {
-    Color color;
+    cout << "=== ДЕМОНСТРАЦИЯ РАБОТЫ КЛАССА VECTOR ===" << endl << endl;
 
-    // Тест 1:
-    cout << "Тест 1: Красный цвет (255, 0, 0)" << endl;
-    color.set_RGB(255, 0, 0);
-    color.print();
-    color.set_HSV(0, 1, 1);
-    color.print();
+    // 1. Тестирование различных конструкторов
+    cout << "1. ТЕСТИРОВАНИЕ КОНСТРУКТОРОВ:" << endl;
+    cout << "--------------------------------" << endl;
     
-    // Тест 2:
-    cout << "Тест 2: Зеленый цвет (0, 255, 0)" << endl;
-    color.set_RGB(0, 255, 0);
-    color.print();
-    color.set_HSV(120, 1, 1);
-    color.print();
+    cout << "а) Конструктор по умолчанию:" << endl;
+    Vector v1;
+    v1.print();
+    cout << endl;
+
+    cout << "б) Конструктор с параметром размера:" << endl;
+    Vector v2(3);
+    v2.print();
+    cout << endl;
+
+    cout << "в) Конструктор с размером и значением:" << endl;
+    Vector v3(4, 7);
+    v3.print();
+    cout << endl;
+
+    cout << "г) Конструктор с внешним массивом:" << endl;
+    int external_array[] = {10, 20, 30, 40, 50};
+    Vector v4(external_array, 5);
+    v4.print();
+    cout << "   Владеет памятью: " << v4.OwnsMemory() << endl;
+    cout << endl;
+
+    // 2. Тестирование конструктора копирования
+    cout << "2. ТЕСТИРОВАНИЕ КОНСТРУКТОРА КОПИРОВАНИЯ:" << endl;
+    cout << "-----------------------------------------" << endl;
     
-    // Тест 3:
-    cout << "Тест 3: Синий цвет (0, 0, 255)" << endl;
-    color.set_RGB(0, 0, 255);
-    color.print();
-    color.set_HSV(240, 1, 1);
-    color.print();
+    cout << "а) Копирование владеющего вектора:" << endl;
+    Vector v5(3, 100);
+    Vector v6(v5); // конструктор копирования
+    cout << "Оригинал: ";
+    v5.print();
+    cout << "Копия:    ";
+    v6.print();
+    cout << "Изменяем копию..." << endl;
+    v6.SetElement(1, 999);
+    cout << "Оригинал после изменения копии: ";
+    v5.print();
+    cout << "Копия после изменения: ";
+    v6.print();
+    cout << endl;
+
+    cout << "б) Копирование невладеющего вектора:" << endl;
+    int external_array2[] = {1, 2, 3};
+    Vector v7(external_array2, 3);
+    Vector v8(v7); // конструктор копирования для невладеющего
+    cout << "Оригинал: ";
+    v7.print();
+    cout << "Копия:    ";
+    v8.print();
+    cout << "Изменяем оригинал (внешний массив)..." << endl;
+    external_array2[1] = 888;
+    cout << "Оригинал после изменения: ";
+    v7.print();
+    cout << "Копия после изменения оригинала: ";
+    v8.print();
+    cout << endl;
+
+    // 3. Тестирование методов доступа и модификации
+    cout << "3. ТЕСТИРОВАНИЕ МЕТОДОВ ДОСТУПА:" << endl;
+    cout << "--------------------------------" << endl;
     
-    // Тест 4:
-    cout << "Тест 4: Серый цвет (128, 128, 128) | Любые H" << endl;
-    color.set_HSV(340, 0, 0.5);
-    color.print();
-    color.set_HSV(360, 0, 0.5);
-    color.print();
+    Vector v9(5);
+    for (int i = 0; i < v9.Size(); i++) {
+        v9.SetElement(i, i * 10);
+    }
+    cout << "Вектор после заполнения: ";
+    v9.print();
     
-    // Тест 5:
-    cout << "Тест 5: Серый цвет (128, 128, 128) | Получить HSV" << endl;
-    color.set_RGB(128, 128, 128);
-    color.print();
+    cout << "Чтение элементов: ";
+    for (int i = 0; i < v9.Size(); i++) {
+        cout << v9.GetElement(i) << " ";
+    }
+    cout << endl;
     
-    // Тест 6:
-    cout << "Тест 6: V = 0" << endl;
-    color.set_HSV(1, 1, 0);
-    color.print();
+    // Тестирование обработки некорректных индексов
+    cout << "Тестирование обработки ошибок индексации:" << endl;
+    v9.SetElement(-1, 100);  // Ошибка: отрицательный индекс
+    v9.SetElement(10, 100);  // Ошибка: индекс больше размера
+    cout << "Попытка чтения с некорректным индексом: " << v9.GetElement(100) << endl;
+    cout << endl;
+
+    // 4. Тестирование скалярного произведения
+    cout << "4. ТЕСТИРОВАНИЕ СКАЛЯРНОГО ПРОИЗВЕДЕНИЯ:" << endl;
+    cout << "---------------------------------------" << endl;
     
-    // Тест 7:
-    cout << "Тест 7: RGB = {0, 0, 0}" << endl;
-    color.set_RGB(0, 0, 0);
-    color.print();
+    Vector v10(3);
+    v10.SetElement(0, 1); v10.SetElement(1, 2); v10.SetElement(2, 3);
     
-    color.set_RGB(64, 0, 0);
-    color.print();
-    color.set_HSV(45, 1, 0.25);
-    color.print();
+    Vector v11(3);
+    v11.SetElement(0, 4); v11.SetElement(1, 5); v11.SetElement(2, 6);
+    
+    cout << "Вектор 1: "; v10.print();
+    cout << "Вектор 2: "; v11.print();
+    cout << "Скалярное произведение: " << v10.Dot(v11) << endl;
+    
+    // Тестирование с векторами разного размера
+    Vector v12(2, 1);
+    cout << "Вектор 3 (размер 2): "; v12.print();
+    cout << "Попытка скалярного произведения векторов разного размера: " << v10.Dot(v12) << endl;
+    cout << endl;
+
+    // 5. Тестирование переходов между режимами владения
+    cout << "5. ТЕСТИРОВАНИЕ ПЕРЕХОДОВ МЕЖДУ РЕЖИМАМИ ВЛАДЕНИЯ:" << endl;
+    cout << "-------------------------------------------------" << endl;
+    
+    cout << "а) Link - переход к использованию внешнего массива:" << endl;
+    Vector v13(3, 50);
+    cout << "До Link: "; v13.print();
+    
+    int new_external[] = {100, 200, 300};
+    v13.Link(new_external, 3);
+    cout << "После Link: "; v13.print();
+    cout << "Владеет памятью: " << v13.OwnsMemory() << endl;
+    
+    // Изменяем внешний массив
+    new_external[1] = 999;
+    cout << "После изменения внешнего массива: "; v13.print();
+    cout << endl;
+
+    cout << "б) Unlink - создание копии данных:" << endl;
+    cout << "До Unlink: "; v13.print();
+    v13.Unlink();
+    cout << "После Unlink: "; v13.print();
+    cout << "Владеет памятью: " << v13.OwnsMemory() << endl;
+    
+    // Теперь изменения внешнего массива не влияют на вектор
+    new_external[1] = 111;
+    cout << "После изменения внешнего массива: "; v13.print();
+    cout << endl;
+
+
+    // 6. Тестирование корректности работы деструкторов
+    cout << "6. ТЕСТИРОВАНИЕ РАБОТЫ ДЕСТРУКТОРОВ:" << endl;
+    cout << "-----------------------------------" << endl;
+    
+    cout << "Создание временных объектов в блоке..." << endl;
+    {
+        Vector temp1(2, 5);
+        Vector temp2(temp1);
+        int temp_array[] = {7, 8, 9};
+        Vector temp3(temp_array, 3);
+    }
+    cout << "Выход из блока - все деструкторы должны были вызваться" << endl << endl;
+
+    // 7. Дополнительные edge cases
+    cout << "7. ДОПОЛНИТЕЛЬНЫЕ ТЕСТЫ (EDGE CASES):" << endl;
+    cout << "------------------------------------" << endl;
+    
+    cout << "а) Вектор нулевого размера:" << endl;
+    Vector v14(0);
+    v14.print();
+    cout << "Попытка установки элемента: ";
+    v14.SetElement(0, 1);
+    cout << endl;
+
+    cout << "б) Unlink для уже владеющего вектора:" << endl;
+    Vector v15(2, 10);
+    cout << "До Unlink: "; v15.print();
+    v15.Unlink(); // Не должен ничего менять
+    cout << "После Unlink: "; v15.print();
+    cout << endl;
+
+    cout << "в) Link с нулевым указателем:" << endl;
+    Vector v16(2, 20);
+    v16.Link(nullptr, 0);
+    v16.print();
+    cout << endl;
+
+    cout << "=== ТЕСТИРОВАНИЕ ЗАВЕРШЕНО ===" << endl;
+
     return 0;
 }
