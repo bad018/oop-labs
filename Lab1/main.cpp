@@ -107,7 +107,7 @@ private:
     
     bool is_valid_SV(float value)
     {
-        return value >= 0 && value <= 1;
+        return value >= 0.0 && value <= 1.0;
     }
     
     void RGB_to_HSV(int r, int g, int b)
@@ -197,18 +197,62 @@ private:
             b1 = x;
         }
         
-        r = (r1 + m) * 255;
-        g = (g1 + m) * 255;
-        b = (b1 + m) * 255;
+        r = round((r1 + m) * 255);
+        g = round((g1 + m) * 255);
+        b = round((b1 + m) * 255);
     }
 };
 
 int main()
 {
     Color color;
+
+    // Тест 1:
+    cout << "Тест 1: Красный цвет (255, 0, 0)" << endl;
     color.set_RGB(255, 0, 0);
     color.print();
-    color.set_HSV(0, 0, 0.501961);
+    color.set_HSV(0, 1, 1);
+    color.print();
+    
+    // Тест 2:
+    cout << "Тест 2: Зеленый цвет (0, 255, 0)" << endl;
+    color.set_RGB(0, 255, 0);
+    color.print();
+    color.set_HSV(120, 1, 1);
+    color.print();
+    
+    // Тест 3:
+    cout << "Тест 3: Синий цвет (0, 0, 255)" << endl;
+    color.set_RGB(0, 0, 255);
+    color.print();
+    color.set_HSV(240, 1, 1);
+    color.print();
+    
+    // Тест 4:
+    cout << "Тест 4: Серый цвет (128, 128, 128) | Любые H" << endl;
+    color.set_HSV(340, 0, 0.5);
+    color.print();
+    color.set_HSV(360, 0, 0.5);
+    color.print();
+    
+    // Тест 5:
+    cout << "Тест 5: Серый цвет (128, 128, 128) | Получить HSV" << endl;
+    color.set_RGB(128, 128, 128);
+    color.print();
+    
+    // Тест 6:
+    cout << "Тест 6: V = 0" << endl;
+    color.set_HSV(1, 1, 0);
+    color.print();
+    
+    // Тест 7:
+    cout << "Тест 7: RGB = {0, 0, 0}" << endl;
+    color.set_RGB(0, 0, 0);
+    color.print();
+    
+    color.set_RGB(64, 0, 0);
+    color.print();
+    color.set_HSV(45, 1, 0.25);
     color.print();
     return 0;
 }
