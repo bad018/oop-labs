@@ -205,7 +205,7 @@ int main()
     
     cout << "а) Копирование владеющего вектора:" << endl;
     Vector v5(3, 100);
-    Vector v6(v5); // конструктор копирования
+    Vector v6(v5);
     cout << "Оригинал: ";
     v5.print();
     cout << "Копия:    ";
@@ -221,7 +221,7 @@ int main()
     cout << "б) Копирование невладеющего вектора:" << endl;
     int external_array2[] = {1, 2, 3};
     Vector v7(external_array2, 3);
-    Vector v8(v7); // конструктор копирования для невладеющего
+    Vector v8(v7);
     cout << "Оригинал: ";
     v7.print();
     cout << "Копия:    ";
